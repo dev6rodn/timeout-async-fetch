@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<head>
+    <title>My Website</title>
+    <style>
+      #message {
+        font-size: 14px;
+        margin-top: 10px;
+      }
+    </style>
+</head>
+
+<body>
+  <button>Load games</button>
+  <div id="message">Click to load the games.</div>
+  <script>
+    async function fetchWithTimeout(resource, options) {
+      const { timeout = 8000 } = options;
+      
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+
+      const response = await fetch(resource, {
+        ...options,
+        signal: controller.signal  
+      });
+      clearTimeout(id);
+
+      return response;
+    }
+
+    async function loadGames() {
+      try {
+        log('Loading games...');
+        const response = await fetchWithTimeout('/games', {
+          timeout: 6000
+        });
+        const games = await response.json();
+        log('Games have been loaded.');
+        return games;
+      } catch (error) {
+        log(`Error: ${error.name}`);
+      }
+    }
+
+    document.querySelector('button').addEventListener('click', loadGames);
+
+    function log(message) {
+      document.getElementById('message').innerText = message;
+    }
+  </script>
+</body>
+
+</html>
